@@ -1,0 +1,55 @@
+{  
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",  
+  "contentVersion": "1.0.0.0",  
+  "parameters": {  
+    "location": {  
+      "value": "WestUS"  
+    },  
+    "dnsServers": {  
+      "value": [  
+        "10.0.0.4",  
+        "10.0.0.5"  
+      ]  
+    },  
+    "vnet": {  
+      "value": {  
+        "vnetName": "myVNet",  
+        "location": "eastus",  
+        "addressPrefixes": [  
+          "10.0.0.0/16"  
+        ],  
+        "subnets": [  
+          {  
+            "name": "subnet1",  
+            "addressPrefix": "10.0.1.0/24",  
+            "serviceEndpoints": [  
+              {  
+                "service": "Microsoft.Storage",  
+                "locations": [  
+                  "*"  
+                ]  
+              }  
+            ],  
+            "delegation": null,  
+            "routeTable": {  
+              "id": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/routeTables/myRouteTable"  
+            }  
+          },  
+          {  
+            "name": "subnet2",  
+            "addressPrefix": "10.0.2.0/24",  
+            "serviceEndpoints": null,  
+            "delegation": {  
+              "name": "myDelegation",  
+              "serviceName": "Microsoft.ContainerInstance/containerGroups",  
+              "actions": [  
+                "Microsoft.Network/virtualNetworks/subnets/join/action"  
+              ]  
+            },  
+            "routeTable": null  
+          }  
+        ]  
+      }  
+    }  
+  }  
+}  

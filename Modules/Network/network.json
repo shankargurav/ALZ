@@ -1,0 +1,450 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.17.1.54307",
+      "templateHash": "13156006990775224684"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "nsg": {
+      "type": "object"
+    },
+    "routetable": {
+      "type": "object"
+    },
+    "hubVirtualNetwork": {
+      "type": "object"
+    },
+    "spokeVirtualNetworks": {
+      "type": "array"
+    },
+    "targetResourceGroupName": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "nsgModule",
+      "resourceGroup": "[parameters('targetResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "properties": {
+            "value": "[parameters('nsg').properties]"
+          },
+          "securityRules": {
+            "value": "[parameters('nsg').securityRules]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.17.1.54307",
+              "templateHash": "7113898608881538377"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "properties": {
+              "type": "object"
+            },
+            "securityRules": {
+              "type": "array"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2020-11-01",
+              "name": "[parameters('properties').name]",
+              "location": "[parameters('location')]"
+            },
+            {
+              "copy": {
+                "name": "securityRule",
+                "count": "[length(parameters('securityRules'))]"
+              },
+              "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+              "apiVersion": "2020-11-01",
+              "name": "[format('{0}/{1}', parameters('properties').name, format('{0}', parameters('securityRules')[copyIndex()].name))]",
+              "properties": {
+                "protocol": "[parameters('securityRules')[copyIndex()].protocol]",
+                "sourcePortRange": "[parameters('securityRules')[copyIndex()].sourcePortRange]",
+                "destinationPortRange": "[parameters('securityRules')[copyIndex()].destinationPortRange]",
+                "sourceAddressPrefix": "[parameters('securityRules')[copyIndex()].sourceAddressPrefix]",
+                "destinationAddressPrefix": "[parameters('securityRules')[copyIndex()].destinationAddressPrefix]",
+                "access": "[parameters('securityRules')[copyIndex()].access]",
+                "priority": "[parameters('securityRules')[copyIndex()].priority]",
+                "direction": "[parameters('securityRules')[copyIndex()].direction]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('properties').name)]"
+              ]
+            }
+          ],
+          "outputs": {
+            "nsgResourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('properties').name)]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "routeTableModule",
+      "resourceGroup": "[parameters('targetResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "properties": {
+            "value": "[parameters('routetable').properties]"
+          },
+          "routes": {
+            "value": "[parameters('routetable').routes]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.17.1.54307",
+              "templateHash": "15487762132842692831"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "properties": {
+              "type": "object"
+            },
+            "routes": {
+              "type": "array"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/routeTables",
+              "apiVersion": "2020-11-01",
+              "name": "[parameters('properties').name]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "disableBgpRoutePropagation": "[parameters('properties').disableBgpRoutePropagation]"
+              }
+            },
+            {
+              "copy": {
+                "name": "route",
+                "count": "[length(parameters('routes'))]"
+              },
+              "type": "Microsoft.Network/routeTables/routes",
+              "apiVersion": "2020-11-01",
+              "name": "[format('{0}/{1}', parameters('properties').name, format('{0}', parameters('routes')[copyIndex()].name))]",
+              "properties": {
+                "addressPrefix": "[parameters('routes')[copyIndex()].addressPrefix]",
+                "nextHopType": "[parameters('routes')[copyIndex()].nextHopType]",
+                "nextHopIpAddress": "[parameters('routes')[copyIndex()].nextHopIpAddress]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/routeTables', parameters('properties').name)]"
+              ]
+            }
+          ],
+          "outputs": {
+            "routeTableResourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/routeTables', parameters('properties').name)]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "hubVnet",
+      "resourceGroup": "[parameters('targetResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "hubVnet": {
+            "value": "[parameters('hubVirtualNetwork')]"
+          },
+          "nsgResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'nsgModule'), '2022-09-01').outputs.nsgResourceId.value]"
+          },
+          "routeTableResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'routeTableModule'), '2022-09-01').outputs.routeTableResourceId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.17.1.54307",
+              "templateHash": "9194735340156971235"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "hubVnet": {
+              "type": "object"
+            },
+            "nsgResourceId": {
+              "type": "string"
+            },
+            "routeTableResourceId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2020-11-01",
+              "name": "[parameters('hubVnet').name]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "copy": [
+                  {
+                    "name": "subnets",
+                    "count": "[length(parameters('hubVnet').subnets)]",
+                    "input": {
+                      "name": "[parameters('hubVnet').subnets[copyIndex('subnets')].name]",
+                      "properties": {
+                        "addressPrefix": "[parameters('hubVnet').subnets[copyIndex('subnets')].addressPrefix]",
+                        "serviceEndpoints": "[if(contains(parameters('hubVnet').subnets[copyIndex('subnets')], 'serviceEndpoints'), parameters('hubVnet').subnets[copyIndex('subnets')].serviceEndpoints, null())]",
+                        "routeTable": "[if(and(not(empty(parameters('routeTableResourceId'))), not(equals(parameters('hubVnet').subnets[copyIndex('subnets')].name, 'GatewaySubnet'))), createObject('id', parameters('routeTableResourceId')), null())]",
+                        "networkSecurityGroup": "[if(and(not(empty(parameters('nsgResourceId'))), not(equals(parameters('hubVnet').subnets[copyIndex('subnets')].name, 'GatewaySubnet'))), createObject('id', parameters('nsgResourceId')), null())]"
+                      }
+                    }
+                  }
+                ],
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('hubVnet').addressSpace]"
+                  ]
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "hubVnetResourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('hubVnet').name)]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'nsgModule')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'routeTableModule')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "spokeVnet",
+      "resourceGroup": "[parameters('targetResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "virtualNetworks": {
+            "value": "[parameters('spokeVirtualNetworks')]"
+          },
+          "nsgResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'nsgModule'), '2022-09-01').outputs.nsgResourceId.value]"
+          },
+          "routeTableResourceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'routeTableModule'), '2022-09-01').outputs.routeTableResourceId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.17.1.54307",
+              "templateHash": "18420357463547478572"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string"
+            },
+            "virtualNetworks": {
+              "type": "array"
+            },
+            "nsgResourceId": {
+              "type": "string"
+            },
+            "routeTableResourceId": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "copy": {
+                "name": "vnet",
+                "count": "[length(parameters('virtualNetworks'))]"
+              },
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2020-11-01",
+              "name": "[parameters('virtualNetworks')[copyIndex()].name]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "copy": [
+                  {
+                    "name": "subnets",
+                    "count": "[length(parameters('virtualNetworks')[copyIndex()].subnets)]",
+                    "input": {
+                      "name": "[parameters('virtualNetworks')[copyIndex()].subnets[copyIndex('subnets')].name]",
+                      "properties": {
+                        "addressPrefix": "[parameters('virtualNetworks')[copyIndex()].subnets[copyIndex('subnets')].addressPrefix]",
+                        "serviceEndpoints": "[if(contains(parameters('virtualNetworks')[copyIndex()].subnets[copyIndex('subnets')], 'serviceEndpoints'), parameters('virtualNetworks')[copyIndex()].subnets[copyIndex('subnets')].serviceEndpoints, null())]",
+                        "routeTable": "[if(and(not(empty(parameters('routeTableResourceId'))), not(equals(parameters('virtualNetworks')[copyIndex()].subnets[copyIndex('subnets')].name, 'GatewaySubnet'))), createObject('id', parameters('routeTableResourceId')), null())]",
+                        "networkSecurityGroup": "[if(and(not(empty(parameters('nsgResourceId'))), not(equals(parameters('virtualNetworks')[copyIndex()].subnets[copyIndex('subnets')].name, 'GatewaySubnet'))), createObject('id', parameters('nsgResourceId')), null())]"
+                      }
+                    }
+                  }
+                ],
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "[parameters('virtualNetworks')[copyIndex()].addressSpace]"
+                  ]
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "vnetsCreated": {
+              "type": "bool",
+              "value": true
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'nsgModule')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'routeTableModule')]"
+      ]
+    },
+    {
+      "copy": {
+        "name": "vnetPeering",
+        "count": "[length(parameters('spokeVirtualNetworks'))]"
+      },
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "[format('vnetPeering-{0}', copyIndex())]",
+      "resourceGroup": "[parameters('targetResourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "hubVnetId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'hubVnet'), '2022-09-01').outputs.hubVnetResourceId.value]"
+          },
+          "spokeVnetId": {
+            "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('spokeVirtualNetworks')[copyIndex()].name)]"
+          },
+          "vnetsCreated": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'spokeVnet'), '2022-09-01').outputs.vnetsCreated.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.17.1.54307",
+              "templateHash": "13404851960246957039"
+            }
+          },
+          "parameters": {
+            "hubVnetId": {
+              "type": "string"
+            },
+            "spokeVnetId": {
+              "type": "string"
+            },
+            "vnetsCreated": {
+              "type": "bool"
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks/virtualNetworkPeerings",
+              "apiVersion": "2020-11-01",
+              "name": "[format('{0}-{1}', last(split(parameters('hubVnetId'), '/')), last(split(parameters('spokeVnetId'), '/')))]",
+              "properties": {
+                "remoteVirtualNetwork": {
+                  "id": "[parameters('spokeVnetId')]"
+                },
+                "allowVirtualNetworkAccess": true,
+                "allowForwardedTraffic": true,
+                "allowGatewayTransit": false,
+                "useRemoteGateways": false
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'hubVnet')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'nsgModule')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'routeTableModule')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('targetResourceGroupName')), 'Microsoft.Resources/deployments', 'spokeVnet')]"
+      ]
+    }
+  ]
+}

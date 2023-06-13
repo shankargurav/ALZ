@@ -1,0 +1,183 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "westus"
+    },
+    "targetResourceGroupName": {
+      "value": "rg-bicep-deployment"
+    },
+    "nsg": {
+      "value": {
+        "properties": {
+          "name": "nsg-westus-001"
+        },
+        "securityRules": [
+          {
+            "name": "AllowSSH",
+            "protocol": "Tcp",
+            "sourcePortRange": "*",
+            "destinationPortRange": "22",
+            "sourceAddressPrefix": "Internet",
+            "destinationAddressPrefix": "VirtualNetwork",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Inbound"
+          }
+        ]
+      }
+    },
+    "routetable": {
+      "value": {
+        "properties": {
+          "name": "rt-westus-001",
+          "disableBgpRoutePropagation": false
+        },
+        "routes": [
+          {
+            "name": "route1",
+            "addressPrefix": "0.0.0.0/0",
+            "nextHopType": "VirtualAppliance",
+            "nextHopIpAddress": "10.0.1.4"
+          }
+        ]
+      }
+    },
+    "hubVirtualNetwork": {
+      "value": {
+        "subscriptionId": "your-hub-subscription-id",
+        "resourceGroup": "your-hub-resource-group",
+        "properties": {
+          "name": "vnet-core-westus-001",
+          "addressSpace": "10.1.0.0/16"
+        },
+        "subnets": [
+          {
+            "name": "snet-core-ext-fw-mgmt-westus-001",
+            "addressPrefix": "10.1.0.0/24"
+          },
+          {
+            "name": "snet-core-ext-fw-trust-westus-001",
+            "addressPrefix": "10.1.1.0/24"
+          },
+          {
+            "name": "snet-core-ext-fw-untrust-westus-001",
+            "addressPrefix": "10.1.2.0/24"
+          },
+          {
+            "name": "snet-core-wan-fw-sync-westus-001",
+            "addressPrefix": "10.1.3.0/24"
+          },
+          {
+            "name": "snet-core-wan-fw-mgmt-westus-001",
+            "addressPrefix": "10.1.4.0/24"
+          },
+          {
+            "name": "snet-core-wan-fw-trust-westus-001",
+            "addressPrefix": "10.1.5.0/24"
+          },
+          {
+            "name": "snet-core-wan-fw-untrust-westus-001",
+            "addressPrefix": "10.1.6.0/24"
+          },
+          {
+            "name": "snet-core-waf-westus-001",
+            "addressPrefix": "10.1.7.0/24"
+          },
+          {
+            "name": "snet-core-addns-westus-001",
+            "addressPrefix": "10.1.8.0/24"
+          },
+          {
+            "name": "snet-core-tenable-westus-001",
+            "addressPrefix": "10.1.9.0/24"
+          },
+          {
+            "name": "GatewaySubnet",
+            "addressPrefix": "10.1.10.0/24"
+          }
+        ]
+      }
+    },
+    "spokeVirtualNetworks": {
+      "value": [
+        {
+          "subscriptionId": "your-spoke-subscription-id",
+          "resourceGroup": "your-spoke-resource-group",
+          "properties": {
+            "name": "vnet-core-DMZ-westus-001",
+            "addressSpace": "10.0.0.0/16"
+          },
+          "subnets": [
+            {
+              "name": "snet-dmz-core-westus-002",
+              "addressPrefix": "10.0.0.0/24"
+            }
+          ]
+        },
+        {
+          "subscriptionId": "your-spoke-subscription-id",
+          "resourceGroup": "your-spoke-resource-group",
+          "properties": {
+            "name": "vnet-app-prod-DMZ-westus-001",
+            "addressSpace": "10.2.0.0/16"
+          },
+          "subnets": []
+        },
+        {
+          "subscriptionId": "your-spoke-subscription-id",
+          "resourceGroup": "your-spoke-resource-group",
+          "properties": {
+            "name": "vnet-app-prod-westus-001",
+            "addressSpace": "10.3.0.0/16"
+          },
+          "subnets": [
+            {
+              "name": "snet-app-prod-app-westus-001",
+              "addressPrefix": "10.3.0.0/24"
+            },
+            {
+              "name": "snet-app-prod-web-westus-001",
+              "addressPrefix": "10.3.1.0/24"
+            },
+            {
+              "name": "snet-app-prod-db-westus-001",
+              "addressPrefix": "10.3.2.0/24"
+            },
+            {
+              "name": "snet-app-prod-agw-westus-001",
+              "addressPrefix": "10.3.3.0/24"
+            }
+          ]
+        },
+        {
+          "subscriptionId": "your-spoke-subscription-id",
+          "resourceGroup": "your-spoke-resource-group",
+          "properties": {
+            "name": "vnet-sap-prod-westus-001",
+            "addressSpace": "10.4.0.0/16"
+          },
+          "subnets": [
+            {
+              "name": "snet-sap-prod-DB-westus-001",
+              "addressPrefix": "10.4.0.0/24"
+            },
+            {
+              "name": "snet-sap-prod-app-westus-001",
+              "addressPrefix": "10.4.1.0/24"
+            },
+            {
+              "name": "snet-sap-nonprod-web-westus-001",
+              "addressPrefix": "10.4.2.0/24"
+            },
+            {
+              "name": "snet-sap-prod-pen-westus-001",
+              "addressPrefix": "10.4.3.0/24"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

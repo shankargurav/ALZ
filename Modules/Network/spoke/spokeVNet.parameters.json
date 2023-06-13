@@ -1,0 +1,80 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "westus"
+    },
+    "spokeVirtualNetworks": {
+      "value": [
+        {
+          "subscriptionId": "your-spoke-subscription-id",
+          "resourceGroup": "your-spoke-resource-group",
+          "name": "vnet-core-DMZ-westus-001",
+          "addressSpace": "10.0.0.0/16",
+          "subnets": [
+            {
+              "name": "snet-dmz-core-westus-002",
+              "addressPrefix": "10.0.0.0/24"
+            }
+          ]
+        },
+        {
+          "subscriptionId": "your-spoke-subscription-id",
+          "resourceGroup": "your-spoke-resource-group",
+          "name": "vnet-app-prod-DMZ-westus-001",
+          "addressSpace": "10.2.0.0/16",
+          "subnets": []
+        },
+        {
+          "subscriptionId": "your-spoke-subscription-id",
+          "resourceGroup": "your-spoke-resource-group",
+          "name": "vnet-app-prod-westus-001",
+          "addressSpace": "10.3.0.0/16",
+          "subnets": [
+            {
+              "name": "snet-app-prod-app-westus-001",
+              "addressPrefix": "10.3.0.0/24"
+            },
+            {
+              "name": "snet-app-prod-web-westus-001",
+              "addressPrefix": "10.3.1.0/24"
+            },
+            {
+              "name": "snet-app-prod-db-westus-001",
+              "addressPrefix": "10.3.2.0/24"
+            },
+            {
+              "name": "snet-app-prod-agw-westus-001",
+              "addressPrefix": "10.3.3.0/24"
+            }
+          ]
+        },
+        {
+          "subscriptionId": "your-spoke-subscription-id",
+          "resourceGroup": "your-spoke-resource-group",
+          "name": "vnet-sap-prod-westus-001",
+          "addressSpace": "10.4.0.0/16",
+          "subnets": [
+            {
+              "name": "snet-sap-prod-DB-westus-001",
+              "addressPrefix": "10.4.0.0/24"
+            },
+            {
+              "name": "snet-sap-prod-app-westus-001",
+              "addressPrefix": "10.4.1.0/24"
+            },
+            {
+              "name": "snet-sap-nonprod-web-westus-001",
+              "addressPrefix": "10.4.2.0/24"
+            },
+            {
+              "name": "snet-sap-prod-pen-westus-001",
+              "addressPrefix": "10.4.3.0/24"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{  
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",  
+  "contentVersion": "1.0.0.0",  
+  "parameters": {  
+    "location": {  
+      "value": "<YourLocation>"  
+    },  
+    "vmSize": {  
+      "value": "Standard_DS4_v2"  
+    },  
+    "adminUsername": {  
+      "value": "<YourAdminUsername>"  
+    },  
+    "adminPassword": {  
+      "value": "<YourAdminPassword>"  
+    },  
+    "firewallImagePublisher": {  
+      "value": "paloaltonetworks"  
+    },  
+    "firewallImageOffer": {  
+      "value": "vmseries-flex"  
+    },  
+    "firewallImageSku": {  
+      "value": "byol"  
+    },  
+    "firewallImageVersion": {  
+      "value": "10.1.0"  
+    },  
+    "snetCoreFwMgmtId": {  
+      "value": "<SnetCoreFwMgmtId>"  
+    },  
+    "snetCoreFwUntrustId": {  
+      "value": "<SnetCoreFwUntrustId>"  
+    },  
+    "snetCoreFwTrustId": {  
+      "value": "<SnetCoreFwTrustId>"  
+    }  
+  }  
+}  

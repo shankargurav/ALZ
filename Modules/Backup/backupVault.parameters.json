@@ -1,0 +1,33 @@
+{  
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",  
+  "contentVersion": "1.0.0.0",  
+  "parameters": {  
+    "location": {  
+      "value": "<YourLocation>"  
+    },  
+    "backupVaultName": {  
+      "value": "backupVault"  
+    },  
+    "dailyBackupTime": {  
+      "value": "23:00"  
+    },  
+    "vmBackupPolicyName": {  
+      "value": "vmBackupPolicy"  
+    },  
+    "sqlBackupPolicyName": {  
+      "value": "sqlBackupPolicy"  
+    },  
+    "dailyRetentionDays": {  
+      "value": 7  
+    },  
+    "weeklyRetentionWeeks": {  
+      "value": 4  
+    },  
+    "monthlyRetentionMonths": {  
+      "value": 12  
+    },  
+    "yearlyRetentionYears": {  
+      "value": 1  
+    }  
+  }  
+}  

@@ -1,0 +1,42 @@
+{  
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",  
+  "contentVersion": "1.0.0.0",  
+  "parameters": {  
+    "location": {  
+      "value": "<YourLocation>"  
+    },  
+    "vnetId": {  
+      "value": "<YourVnetId>"  
+    },  
+    "subnetName": {  
+      "value": "<YourSubnetName>"  
+    },  
+    "dnsServerNames": {  
+      "value": ["WUAZRSMADPVW902", "WUAZRSMADPVW903"]  
+    },  
+    "vmSize": {  
+      "value": "Standard_D8a_v4"  
+    },  
+    "dnsServersAdminUser": {  
+      "value": "<YourDnsServersAdminUser>"  
+    },  
+    "dnsServersAdminPassword": {  
+      "value": "<YourDnsServersAdminPassword>"  
+    },  
+    "storageAccountName": {  
+      "value": "<YourStorageAccountName>"  
+    },  
+    "storageAccountKey": {  
+      "value": "<YourStorageAccountKey>"  
+    },  
+    "scriptUri": {  
+      "value": "<YourScriptUri>"  
+    },  
+    "dnsServerCount": {  
+      "value": 2  
+    },  
+    "dnsImageId": {  
+      "value": "<YourDnsImageId>"  
+    }  
+  }  
+}  
